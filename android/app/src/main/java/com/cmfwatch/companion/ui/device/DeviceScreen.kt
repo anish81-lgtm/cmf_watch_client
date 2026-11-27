@@ -139,6 +139,7 @@ fun DeviceScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val bleDiagnostics by CmfBleManager.getInstance(context).diagnosticStatus.collectAsState()
+    val telemetryDiagnostics by CmfBleManager.getInstance(context).telemetryDiagnostics.collectAsState()
 
     var showUnpairDialog by remember { mutableStateOf(false) }
     var showWatchFaceStudio by remember { mutableStateOf(false) }
@@ -465,6 +466,19 @@ fun DeviceScreen(
                         fontSize = 14.sp,
                         color = TextOnSurface
                     )
+                    Text(
+                        text = "Sensor packet diagnostics",
+                        fontSize = 11.sp,
+                        color = TextMutedGray
+                    )
+                    Text(
+                        text = telemetryDiagnostics,
+                        fontSize = 12.sp,
+                        color = TextOnSurface
+                    )
+                    Button(onClick = onSyncNow, enabled = isConnected, modifier = Modifier.fillMaxWidth()) {
+                        Text("Refresh all watch data")
+                    }
                     Text(
                         text = "This reports protocol progress; BLE Connected alone does not confirm authentication.",
                         fontSize = 11.sp,

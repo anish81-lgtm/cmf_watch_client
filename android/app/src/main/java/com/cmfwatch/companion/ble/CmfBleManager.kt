@@ -81,6 +81,9 @@ class CmfBleManager(
     private val _diagnosticStatus = MutableStateFlow("Waiting for watch connection")
     val diagnosticStatus: StateFlow<String> = _diagnosticStatus.asStateFlow()
 
+    private val _telemetryDiagnostics = MutableStateFlow("HR: no packets | SpO2: no packets")
+    val telemetryDiagnostics: StateFlow<String> = _telemetryDiagnostics.asStateFlow()
+
     private val _discoveredDevices = MutableStateFlow<List<DiscoveredDevice>>(emptyList())
     val discoveredDevices: StateFlow<List<DiscoveredDevice>> = _discoveredDevices.asStateFlow()
 
@@ -799,6 +802,7 @@ class CmfBleManager(
                 val opcodeStr = "0x%04X".format(cmd1)
                 val samples = TelemetryDecoders.decodeHeartRateBatch(payload, opcodeStr)
                 if (samples.isNotEmpty()) {
+                    _telemetryDiagnostics.value = "HR: ${samples.last().bpm} BPM at ${Instant.now()} (${samples.size} sample(s), $opcodeStr) | " + _telemetryDiagnostics.value.substringAfter(" | ")
                     val newest = samples.last()
                     _latestHeartRate.value = newest.bpm
                     if (isWorkout) {
@@ -833,6 +837,7 @@ class CmfBleManager(
             cmd1 == 0x0055 || cmd1 == 0x00DB || cmd1 == 0x00E1 -> {
                 val samples = TelemetryDecoders.decodeSpO2Batch(payload)
                 if (samples.isNotEmpty()) {
+                    _telemetryDiagnostics.value = _telemetryDiagnostics.value.substringBefore(" | ") + " | SpO2: ${samples.last().percentage}% at ${Instant.now()} (${samples.size} sample(s), opcode 0x%04X)".format(cmd1)
                     managerScope.launch {
                         for (sample in samples) {
                             _spO2Flow.emit(sample)

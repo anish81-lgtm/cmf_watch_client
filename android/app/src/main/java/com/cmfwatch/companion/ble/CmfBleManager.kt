@@ -77,6 +77,10 @@ class CmfBleManager(
     private val _connectionState = MutableStateFlow(DeviceConnectionState.IDLE)
     val connectionState: StateFlow<DeviceConnectionState> = _connectionState.asStateFlow()
 
+    // Human-readable, local-only diagnostics for hardware compatibility testing.
+    private val _diagnosticStatus = MutableStateFlow("Waiting for watch connection")
+    val diagnosticStatus: StateFlow<String> = _diagnosticStatus.asStateFlow()
+
     private val _discoveredDevices = MutableStateFlow<List<DiscoveredDevice>>(emptyList())
     val discoveredDevices: StateFlow<List<DiscoveredDevice>> = _discoveredDevices.asStateFlow()
 
@@ -344,6 +348,7 @@ class CmfBleManager(
         try {
             val device = bluetoothAdapter!!.getRemoteDevice(macAddress)
             Log.i(TAG, "Initiating LE GATT connection to ${device.address}...")
+            _diagnosticStatus.value = "BLE connection requested; waiting for GATT link"
             _connectionState.value = DeviceConnectionState.CONNECTING
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -376,6 +381,7 @@ class CmfBleManager(
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.i(TAG, "GATT connected! Proceeding directly to service discovery (bond after auth).")
+                _diagnosticStatus.value = "BLE connected; discovering CMF services"
                 _connectionState.value = DeviceConnectionState.CONNECTED
 
                 // Store the device name for UI display
@@ -419,6 +425,7 @@ class CmfBleManager(
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
             if (status != BluetoothGatt.GATT_SUCCESS) {
                 Log.e(TAG, "Service discovery failed with status $status")
+                _diagnosticStatus.value = "Service discovery failed (GATT status $status)"
                 _connectionState.value = DeviceConnectionState.ERROR
                 return
             }
@@ -426,12 +433,14 @@ class CmfBleManager(
             val service = gatt.getService(CMF_SERVICE_UUID)
             if (service == null) {
                 Log.e(TAG, "CMF Service $CMF_SERVICE_UUID not found.")
+                _diagnosticStatus.value = "CMF service not found on this watch"
                 _connectionState.value = DeviceConnectionState.ERROR
                 return
             }
 
             cmdCharacteristic = service.getCharacteristic(CMF_CMD_CHAR_UUID)
             cmdWriteCharacteristic = service.getCharacteristic(CMF_CMD_WRITE_CHAR_UUID)
+            _diagnosticStatus.value = "CMF service found; checking command characteristics"
 
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -443,6 +452,7 @@ class CmfBleManager(
 
             if (cmdCharacteristic != null) {
                 Log.i(TAG, "Subscribing to Command notifications ($CMF_CMD_CHAR_UUID)...")
+                _diagnosticStatus.value = "CMF service found; subscribing to watch notifications"
                 _connectionState.value = DeviceConnectionState.SUBSCRIBING
                 subscribeTimeoutJob?.cancel()
                 subscribeTimeoutJob = managerScope.launch {
@@ -500,6 +510,7 @@ class CmfBleManager(
                 subscribeTimeoutJob?.cancel()
                 subscribeTimeoutJob = null
                 Log.i(TAG, "Command CCCD subscribed. Starting session handshake...")
+                _diagnosticStatus.value = "Notifications subscribed; starting authentication"
                 startSessionHandshake()
             } else if (descriptor.characteristic.uuid == shellNotifyCharacteristic?.uuid) {
                 Log.i(TAG, "Shell notify CCCD subscribed. Ready for shell pairing exchange.")
@@ -533,12 +544,14 @@ class CmfBleManager(
         authHandshakeJob = managerScope.launch {
             try {
                 if (authKey == null) {
+                    _diagnosticStatus.value = "No saved app key; watch pairing handshake required"
                     beginFirstTimePairing()
                     return@launch
                 }
 
                 sessionKey = authKey
                 _connectionState.value = DeviceConnectionState.AUTHENTICATING
+                _diagnosticStatus.value = "Saved key found; sending authentication request"
                 Log.i(TAG, "Handshake Step 1: Sending AUTH_PHONE_NAME (0xFFFF 8049)...")
                 val phoneNameBytes = byteArrayOf(0xA5.toByte()) + "CMF Companion".toByteArray(Charsets.UTF_8)
                 sendFrame(0xFFFF, 0x8049, phoneNameBytes, useEncryption = true)
@@ -546,6 +559,7 @@ class CmfBleManager(
                 delay(15000)
                 if (_connectionState.value == DeviceConnectionState.AUTHENTICATING) {
                     Log.w(TAG, "Authentication timed out. Resetting to idle state and disconnecting.")
+                    _diagnosticStatus.value = "Authentication timed out; no confirmation received"
                     _connectionState.value = DeviceConnectionState.IDLE
                     disconnect()
                 }
@@ -595,6 +609,7 @@ class CmfBleManager(
                 delay(20000)
                 if (_connectionState.value == DeviceConnectionState.AUTHENTICATING) {
                     Log.w(TAG, "First-time pairing timed out. Resetting to idle state.")
+                    _diagnosticStatus.value = "Pairing handshake timed out; no watch response"
                     _connectionState.value = DeviceConnectionState.IDLE
                     disconnect()
                 }
@@ -701,6 +716,7 @@ class CmfBleManager(
                 val expected = signChallenge(rnd2, pairingSecret ?: return)
                 if (!signed2.contentEquals(expected)) {
                     Log.e(TAG, "Pair challenge verification failed.")
+                    _diagnosticStatus.value = "Pairing challenge verification failed"
                     _connectionState.value = DeviceConnectionState.ERROR
                     return
                 }
@@ -741,6 +757,7 @@ class CmfBleManager(
             // Step 3 Response: AUTHENTICATED_CONFIRM_REPLY (0xFFFF 0x0004) -> Authentication Complete!
             cmd1 == 0xFFFF && cmd2 == 0x0004 -> {
                 Log.i(TAG, "Received AUTHENTICATED_CONFIRM_REPLY (0xFFFF 0x0004). Authentication COMPLETE!")
+                _diagnosticStatus.value = "Authentication confirmed; requesting battery and telemetry"
                 _connectionState.value = DeviceConnectionState.CONNECTED_PAIRED
                 reconnectAttemptCount = 0
 
@@ -772,6 +789,7 @@ class CmfBleManager(
                 if (battery != null) {
                     _batteryState.value = battery
                     Log.i(TAG, "Decoded Watch Battery: ${battery.level}% (Charging: ${battery.isCharging})")
+                    _diagnosticStatus.value = "Battery response received (${battery.level}%)"
                 }
             }
 

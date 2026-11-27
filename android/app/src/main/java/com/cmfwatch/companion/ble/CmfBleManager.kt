@@ -84,6 +84,17 @@ class CmfBleManager(
     private val _telemetryDiagnostics = MutableStateFlow("HR: no packets | SpO2: no packets")
     val telemetryDiagnostics: StateFlow<String> = _telemetryDiagnostics.asStateFlow()
 
+    private val _historyDiagnostics = MutableStateFlow("Steps: no packets | Workouts: no packets | Sleep: no packets | Stress: no packets | Sync: not requested")
+    val historyDiagnostics: StateFlow<String> = _historyDiagnostics.asStateFlow()
+
+    private fun recordHistoryPacket(label: String, payload: ByteArray, decodedCount: Int) {
+        val entry = "$label: packet ${payload.size}B, decoded $decodedCount at ${Instant.now()}"
+        val parts = _historyDiagnostics.value.split(" | ").associate { it.substringBefore(":") to it }
+        _historyDiagnostics.value = listOf("Steps", "Workouts", "Sleep", "Stress", "Sync").map { key ->
+            if (key == label) entry else parts[key] ?: "$key: no packets"
+        }.joinToString(" | ")
+    }
+
     private val _discoveredDevices = MutableStateFlow<List<DiscoveredDevice>>(emptyList())
     val discoveredDevices: StateFlow<List<DiscoveredDevice>> = _discoveredDevices.asStateFlow()
 
@@ -850,6 +861,7 @@ class CmfBleManager(
             // STRESS (0x009D 0x0001)
             cmd1 == 0x009D && cmd2 == 0x0001 -> {
                 val samples = TelemetryDecoders.decodeStressBatch(payload)
+                recordHistoryPacket("Stress", payload, samples.size)
                 if (samples.isNotEmpty()) {
                     managerScope.launch {
                         for (sample in samples) {
@@ -863,6 +875,7 @@ class CmfBleManager(
             // ACTIVITY_DATA / STEP_INTERVALS (0x0056)
             cmd1 == 0x0056 -> {
                 val intervals = TelemetryDecoders.decodeStepIntervalBatch(payload)
+                recordHistoryPacket("Steps", payload, intervals.size)
                 if (intervals.isNotEmpty()) {
                     managerScope.launch {
                         for (interval in intervals) {
@@ -876,6 +889,7 @@ class CmfBleManager(
             // SLEEP_DATA (0x0058)
             cmd1 == 0x0058 -> {
                 val session = TelemetryDecoders.decodeSleepData(payload)
+                recordHistoryPacket("Sleep", payload, if (session != null) 1 else 0)
                 if (session != null) {
                     managerScope.launch { _sleepFlow.emit(session) }
                     Log.i(TAG, "Decoded Sleep Session: ${session.totalSleepMinutes} mins")
@@ -897,6 +911,7 @@ class CmfBleManager(
                 } else {
                     // Completed workout summary batch from watch (32 or 54 bytes per record)
                     val workouts = TelemetryDecoders.decodeWorkoutSummaryBatch(payload)
+                    recordHistoryPacket("Workouts", payload, workouts.size)
                     if (workouts.isNotEmpty()) {
                         _isWorkoutActive.value = false
                         _liveWorkoutHeartRate.value = null
@@ -913,6 +928,7 @@ class CmfBleManager(
             // ACTIVITY_FETCH_1 acknowledgement: send the second fetch only after
             // the watch has finished processing the first request.
             cmd1 == 0xFFFF && cmd2 == 0x0005 -> {
+                _historyDiagnostics.value = _historyDiagnostics.value.substringBefore(" | Sync:") + " | Sync: first activity request acknowledged; workout request sent"
                 sendFrameAsync(0xFFFF, 0x9057, byteArrayOf(0xA5.toByte()), useEncryption = true)
             }
         }
@@ -1026,6 +1042,7 @@ class CmfBleManager(
             delay(300)
             fetchBattery()
             delay(300)
+            _historyDiagnostics.value = "Steps: no packets | Workouts: no packets | Sleep: no packets | Stress: no packets | Sync: activity request sent; awaiting watch response"
             sendFrame(0xFFFF, 0x8005, byteArrayOf(0xA5.toByte()), useEncryption = true) // ACTIVITY_FETCH_1
             delay(2500)
             _connectionState.value = DeviceConnectionState.CONNECTED_PAIRED

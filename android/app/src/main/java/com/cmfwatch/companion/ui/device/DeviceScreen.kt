@@ -56,19 +56,19 @@ import java.util.Locale
 // COLOR PALETTE (EXACT CMF EXPRESSIVE LIGHT THEME)
 // ==========================================
 
-private val DeviceBg = Color(0xFFF9F9FC)
-private val DeviceCardBg = Color(0xFFFFFFFF)
-private val TroughBg = Color(0xFFF3F3F6)
-private val CmfOrange = Color(0xFFFF5722)
-private val CmfOrangeContainer = Color(0xFFFFDBD1)
-private val CmfOrangeDark = Color(0xFFB02F00)
-private val CmfGreen = Color(0xFF008733)
-private val CmfPurple = Color(0xFF4C4ACA)
-private val CmfPurpleBg = Color(0xFFE2DFFF)
-private val TextOnSurface = Color(0xFF1A1C1E)
-private val TextVariant = Color(0xFF5B4039)
-private val TextMutedGray = Color(0xFF70777D)
-private val DeviceBorder = Color(0xFFE2E2E5)
+private val DeviceBg = Color(0xFF0B0E12)
+private val DeviceCardBg = Color(0xFF171C22)
+private val TroughBg = Color(0xFF222A33)
+private val CmfOrange = Color(0xFFFF7043)
+private val CmfOrangeContainer = Color(0xFF4A241B)
+private val CmfOrangeDark = Color(0xFFFF8A65)
+private val CmfGreen = Color(0xFF5BE28A)
+private val CmfPurple = Color(0xFF9B96FF)
+private val CmfPurpleBg = Color(0xFF292747)
+private val TextOnSurface = Color(0xFFF2F4F7)
+private val TextVariant = Color(0xFFC2AFA8)
+private val TextMutedGray = Color(0xFFA0A8B2)
+private val DeviceBorder = Color(0xFF343E49)
 
 // ==========================================
 // MOTION EXTENSION

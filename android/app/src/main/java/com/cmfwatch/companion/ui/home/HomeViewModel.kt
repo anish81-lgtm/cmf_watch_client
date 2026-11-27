@@ -64,7 +64,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         val stands = telemetryStore.computeStandHoursToday()
 
         // Authoritative production validation: only display today's latest heart rate
-        val initialBpm = todayHR.lastOrNull()?.bpm ?: cached.latestHeartRate?.takeIf {
+        val initialBpm = todayHR.lastOrNull { it.opcode != "0x00DA" }?.bpm ?: cached.latestHeartRate?.takeIf {
             cached.lastSyncedAt != null &&
             cached.lastSyncedAt.atZone(java.time.ZoneId.systemDefault()).toLocalDate() == java.time.LocalDate.now()
         }

@@ -1395,9 +1395,9 @@ private fun deriveReadiness(sleepScore: Int?, hr: Int?, stress: Int?): Readiness
         else -> "Low" to "REST"
     }
     val blurb = when {
-        score >= 85 -> "Your resting heart rate is lower than baseline and deep sleep was restorative. Great day for a high-intensity session."
-        score >= 70 -> "Recovery looks solid. Keep intensity moderate and stay hydrated through the afternoon."
-        else -> "Recovery is lagging. Prioritize easy movement, daylight, and an earlier wind-down tonight."
+        score >= 85 -> "Your estimated score is high based on the readings currently available. This is an experimental estimate, not a medical assessment."
+        score >= 70 -> "Your estimated score is moderate based on the readings currently available. This is an experimental estimate, not a medical assessment."
+        else -> "Your estimated score is low based on the readings currently available. This is an experimental estimate, not a medical assessment."
     }
     val suggestion = when {
         score >= 85 -> "Suggested: 5km Outdoor Run"

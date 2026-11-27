@@ -70,13 +70,12 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
         val sleepMins = latestSleep?.totalSleepMinutes ?: cached.lastSleepMinutes
 
-        // Compute today's step totals from the authoritative telemetry store
-        val initialSteps = todaySteps.sumOf { it.steps }.let { if (it > 0) it else cached.todaySteps }
-        val initialDist = todaySteps.sumOf { it.distanceMeters.toDouble() }.toFloat().let { d ->
-            val km = d / 1000f
-            if (km > 0f) km else cached.todayDistanceKm
-        }
-        val initialKcal = todaySteps.sumOf { it.caloriesKcal.toDouble() }.toInt().let { if (it > 0) it else cached.todayCaloriesKcal }
+        // ACTIVITY_DATA records are cumulative snapshots, not independent increments.
+        // Use the newest snapshot; summing them multiplies the daily total.
+        val latestTodaySteps = todaySteps.maxByOrNull { it.timestamp }
+        val initialSteps = latestTodaySteps?.steps?.takeIf { it > 0 } ?: cached.todaySteps
+        val initialDist = latestTodaySteps?.distanceMeters?.takeIf { it > 0f }?.div(1000f) ?: cached.todayDistanceKm
+        val initialKcal = latestTodaySteps?.caloriesKcal?.toInt()?.takeIf { it > 0 } ?: cached.todayCaloriesKcal
 
         _uiState.value = cached.copy(
             latestHeartRate = initialBpm,
@@ -212,11 +211,12 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 val todayStepList = telemetryStore.getStepIntervalsToday()
                 val standsCount = telemetryStore.computeStandHoursToday()
 
-                // Compute totals from the authoritative store to prevent double-counting.
-                // Each step interval has absolute values; we sum ALL today's intervals.
-                val totalSteps = todayStepList.sumOf { it.steps }
-                val totalDist = todayStepList.sumOf { it.distanceMeters.toDouble() }.toFloat() / 1000.0f
-                val totalKcal = todayStepList.sumOf { it.caloriesKcal.toDouble() }.toInt()
+                // Activity history entries are cumulative snapshots. The latest snapshot
+                // represents the current daily total; summing snapshots overcounts it.
+                val latestTodayStep = todayStepList.maxByOrNull { it.timestamp }
+                val totalSteps = latestTodayStep?.steps ?: 0
+                val totalDist = (latestTodayStep?.distanceMeters ?: 0f) / 1000.0f
+                val totalKcal = latestTodayStep?.caloriesKcal?.toInt() ?: 0
 
                 val updated = _uiState.value.copy(
                     todaySteps = totalSteps,

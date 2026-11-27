@@ -1,11 +1,11 @@
 package com.cmfwatch.companion.ui.theme
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val CmfLightColorScheme = lightColorScheme(
+private val CmfDarkColorScheme = darkColorScheme(
     primary = CmfPrimary,
     onPrimary = CmfOnPrimary,
     primaryContainer = CmfPrimaryContainer,
@@ -36,7 +36,7 @@ fun CmfWatchTheme(
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
-        colorScheme = CmfLightColorScheme,
+        colorScheme = CmfDarkColorScheme,
         typography = Typography,
         content = content
     )

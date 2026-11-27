@@ -835,11 +835,8 @@ class CmfBleManager(
                 if (restingSamples.isNotEmpty()) {
                     val newest = restingSamples.last()
                     _restingHeartRate.value = newest.bpm
-                    managerScope.launch {
-                        for (sample in restingSamples) {
-                            _heartRateFlow.emit(sample)
-                        }
-                    }
+                    // Resting HR is a separate metric. Do not emit it into the live HR stream,
+                    // otherwise it can overwrite the dashboard's current heart-rate value.
                     Log.i(TAG, "Decoded Resting HR batch (${restingSamples.size} samples, resting: ${newest.bpm} BPM)")
                 }
             }

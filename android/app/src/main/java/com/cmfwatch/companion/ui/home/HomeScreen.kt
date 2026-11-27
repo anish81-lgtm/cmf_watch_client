@@ -176,6 +176,39 @@ fun HomeScreen(
             }
 
             item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(22.dp))
+                        .background(CmfSurfaceLowest)
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "TODAY'S STEPS",
+                        fontFamily = InterFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 11.sp,
+                        letterSpacing = 0.6.sp,
+                        color = CmfOnSurfaceVariant
+                    )
+                    Text(
+                        text = summary.todaySteps?.takeIf { it >= 0 }?.let { "%,d".format(it) } ?: "Waiting for watch data",
+                        fontFamily = HeadlineFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 28.sp,
+                        color = CmfOnSurface
+                    )
+                    Text(
+                        text = if (summary.todaySteps != null) "Steps recorded today" else "No step data received yet",
+                        fontFamily = InterFontFamily,
+                        fontSize = 12.sp,
+                        color = CmfOnSurfaceVariant
+                    )
+                }
+            }
+
+            item {
                 ActivityRingsCard(
                     completedPct = completedPct,
                     goalPct = goalPct,

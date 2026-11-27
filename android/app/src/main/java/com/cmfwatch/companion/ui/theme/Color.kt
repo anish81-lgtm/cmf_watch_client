@@ -3,41 +3,41 @@ package com.cmfwatch.companion.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // CMF Watch Pro — HTML design tokens
-val CmfBackground = Color(0xFFF3F3F6)
-val CmfSurface = Color(0xFFF3F3F6)
-val CmfOnSurface = Color(0xFF1A1C1E)
-val CmfOnSurfaceVariant = Color(0xFF5B4039)
-val CmfOutline = Color(0xFF907067)
-val CmfOutlineVariant = Color(0xFFE4BEB4)
+val CmfBackground = Color(0xFF0B0E12)
+val CmfSurface = Color(0xFF0B0E12)
+val CmfOnSurface = Color(0xFFF2F4F7)
+val CmfOnSurfaceVariant = Color(0xFFC2AFA8)
+val CmfOutline = Color(0xFF9AA4AF)
+val CmfOutlineVariant = Color(0xFF343D48)
 
-val CmfSurfaceLowest = Color(0xFFFFFFFF)
-val CmfSurfaceLow = Color(0xFFF3F3F6)
-val CmfSurfaceContainer = Color(0xFFEEEEF0)
-val CmfSurfaceHigh = Color(0xFFE8E8EA)
-val CmfSurfaceHighest = Color(0xFFE2E2E5)
+val CmfSurfaceLowest = Color(0xFF171C22)
+val CmfSurfaceLow = Color(0xFF0B0E12)
+val CmfSurfaceContainer = Color(0xFF222A33)
+val CmfSurfaceHigh = Color(0xFF29323C)
+val CmfSurfaceHighest = Color(0xFF343E49)
 
-val CmfPrimary = Color(0xFFB02F00)
-val CmfPrimaryContainer = Color(0xFFFF5722)
-val CmfPrimaryFixed = Color(0xFFFFDBD1)
-val CmfOnPrimary = Color(0xFFFFFFFF)
-val CmfOnPrimaryContainer = Color(0xFF541200)
+val CmfPrimary = Color(0xFFFF8A65)
+val CmfPrimaryContainer = Color(0xFFFF7043)
+val CmfPrimaryFixed = Color(0xFF4A241B)
+val CmfOnPrimary = Color(0xFF171C22)
+val CmfOnPrimaryContainer = Color(0xFFFFE1D8)
 
-val CmfSecondary = Color(0xFF4C4ACA)
-val CmfSecondaryContainer = Color(0xFF6664E4)
-val CmfSecondaryFixed = Color(0xFFE2DFFF)
-val CmfSecondaryFixedDim = Color(0xFFC2C1FF)
-val CmfOnSecondary = Color(0xFFFFFFFF)
+val CmfSecondary = Color(0xFF9B96FF)
+val CmfSecondaryContainer = Color(0xFF817BFF)
+val CmfSecondaryFixed = Color(0xFF292747)
+val CmfSecondaryFixedDim = Color(0xFFBDB8FF)
+val CmfOnSecondary = Color(0xFF171C22)
 
-val CmfTertiary = Color(0xFF006B27)
-val CmfTertiaryContainer = Color(0xFF008733)
-val CmfTertiaryFixed = Color(0xFF72FE88)
-val CmfOnTertiary = Color(0xFFFFFFFF)
-val CmfOnTertiaryFixed = Color(0xFF002107)
-val CmfOnErrorContainer = Color(0xFF93000A)
-val CmfOnSecondaryFixedVariant = Color(0xFF3631B4)
+val CmfTertiary = Color(0xFF5BE28A)
+val CmfTertiaryContainer = Color(0xFF4ED47D)
+val CmfTertiaryFixed = Color(0xFFB5FFCB)
+val CmfOnTertiary = Color(0xFF171C22)
+val CmfOnTertiaryFixed = Color(0xFF062414)
+val CmfOnErrorContainer = Color(0xFFFFB4AB)
+val CmfOnSecondaryFixedVariant = Color(0xFFBDB8FF)
 
-val CmfError = Color(0xFFBA1A1A)
-val CmfErrorContainer = Color(0xFFFFDAD6)
+val CmfError = Color(0xFFFF6B6B)
+val CmfErrorContainer = Color(0xFF4B2024)
 
 // Legacy aliases — mapped onto the new light palette
 val LightBackground = CmfBackground
@@ -51,7 +51,7 @@ val DarkCardVariant = CmfSurfaceLow
 
 val TextPrimary = CmfOnSurface
 val TextSecondary = CmfOnSurfaceVariant
-val TextMuted = Color(0xFF907067)
+val TextMuted = Color(0xFF9AA4AF)
 val DividerColor = CmfOutlineVariant
 
 val RingGreen = CmfTertiaryContainer
@@ -65,9 +65,9 @@ val HeartRateRed = CmfError
 val HeartRateBg = CmfErrorContainer
 val SleepPurple = CmfSecondary
 val SleepPurpleBg = Color(0x1A4C4ACA)
-val SleepDeep = Color(0xFF3631B4)
+val SleepDeep = Color(0xFFBDB8FF)
 val SleepCore = CmfSecondaryContainer
-val SleepREM = Color(0xFFC2C1FF)
+val SleepREM = Color(0xFFBDB8FF)
 
 val SpO2Red = CmfSecondaryContainer
 val RespBlue = CmfSecondaryContainer

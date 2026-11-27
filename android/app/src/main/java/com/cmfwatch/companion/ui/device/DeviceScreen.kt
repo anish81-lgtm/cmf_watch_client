@@ -138,6 +138,7 @@ fun DeviceScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val bleDiagnostics by CmfBleManager.getInstance(context).diagnosticStatus.collectAsState()
 
     var showUnpairDialog by remember { mutableStateOf(false) }
     var showWatchFaceStudio by remember { mutableStateOf(false) }
@@ -440,6 +441,35 @@ fun DeviceScreen(
                             textAlign = TextAlign.Center
                         )
                     }
+                }
+            }
+        }
+
+        // Diagnostic panel: distinguishes BLE link from protocol authentication and telemetry.
+        item {
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = DeviceCardBg,
+                modifier = Modifier.fillMaxWidth().border(1.dp, DeviceBorder, RoundedCornerShape(20.dp))
+            ) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        text = "CONNECTION DIAGNOSTICS",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.sp,
+                        color = TextVariant,
+                        letterSpacing = 0.6.sp
+                    )
+                    Text(
+                        text = bleDiagnostics,
+                        fontSize = 14.sp,
+                        color = TextOnSurface
+                    )
+                    Text(
+                        text = "This reports protocol progress; BLE Connected alone does not confirm authentication.",
+                        fontSize = 11.sp,
+                        color = TextMutedGray
+                    )
                 }
             }
         }

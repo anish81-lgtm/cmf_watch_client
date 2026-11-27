@@ -29,6 +29,9 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Install Android SDK platform and build tools
+        run: sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
+
       - name: Run unit tests and assemble APK
         working-directory: android
         run: |

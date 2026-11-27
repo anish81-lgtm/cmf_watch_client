@@ -140,6 +140,7 @@ fun DeviceScreen(
     val scope = rememberCoroutineScope()
     val bleDiagnostics by CmfBleManager.getInstance(context).diagnosticStatus.collectAsState()
     val telemetryDiagnostics by CmfBleManager.getInstance(context).telemetryDiagnostics.collectAsState()
+    val historyDiagnostics by CmfBleManager.getInstance(context).historyDiagnostics.collectAsState()
 
     var showUnpairDialog by remember { mutableStateOf(false) }
     var showWatchFaceStudio by remember { mutableStateOf(false) }
@@ -475,6 +476,11 @@ fun DeviceScreen(
                         text = telemetryDiagnostics,
                         fontSize = 12.sp,
                         color = TextOnSurface
+                    )
+                    Text(
+                        text = historyDiagnostics,
+                        fontSize = 11.sp,
+                        color = TextMutedGray
                     )
                     Button(onClick = onSyncNow, enabled = isConnected, modifier = Modifier.fillMaxWidth()) {
                         Text("Refresh all watch data")
